@@ -1,0 +1,10 @@
+{
+    "Lua.workspace.library": [
+        "/Users/alexandr/Documents/GitHub/lua_projects/vscode-lua/love"
+    ],
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.diagnostics.globals": [
+        "love"
+    ]
+
+}
