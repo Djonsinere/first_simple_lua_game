@@ -7,6 +7,14 @@ function love.load()
     bullet_img_W, bullet_img_H = bullet:getWidth(), bullet:getHeight()
     ground = love.graphics.newImage('sprites/ground/test+ground.png')
     abs_rotation = 0
+
+    enemy_img = love.graphics.newImage('sprites/enemy/enemy_32.png')
+    enemy_img_W, enemy_img_H = enemy_img:getWidth(), enemy_img:getHeight()
+    enemies = {}  -- массив всех врагов
+    max_enemies = 5  -- например, одновременно максимум 5 врагов
+    spawn_timer = 0
+    spawn_interval = 2  -- каждые 2 секунды спавним врага
+
     love.window.setMode(350,350,{resizable = true, minwidth = 350, minheight = 350})
     window_width, window_height = love.graphics.getDimensions()
         -- Низ окна
@@ -55,13 +63,13 @@ function love.update(dt)
             bullet_index = 1
 
             -- вычисляем траекторию в момент выстрела
-            local barrelLength = 150
+            local barrelLength = 300
             local startX = ground_cx
             local startY = ground_cy
             local endX = startX + math.cos(abs_rotation - math.pi/2) * barrelLength
             local endY = startY + math.sin(abs_rotation - math.pi/2) * barrelLength
 
-            bullet_path = get_cords_for_bullet(startX, startY, endX, endY, 10)
+            bullet_path = get_cords_for_bullet(startX, startY, endX, endY, 100)
         end 
 
         if bullet_active then
@@ -70,6 +78,34 @@ function love.update(dt)
                 bullet_active = false -- пуля достигла конца
             end
         end
+        print("pressed [space], bullet_index: ", bullet_index, "bullet_path: ", bullet_path )
+
+
+    spawn_timer = spawn_timer + dt
+    if spawn_timer >= spawn_interval and #enemies < max_enemies then
+        spawn_timer = 0
+    
+        local start_x = love.math.random(window_width)
+        local start_y = 0
+    
+        local path = get_enemy_path(start_x, start_y, 100)
+    
+        table.insert(enemies, {path = path, index = 1, active = true})
+        print("enemy spawned at x:", start_x)
+    end
+    
+    -- Обновляем всех врагов
+    for i = #enemies, 1, -1 do  -- идём с конца, чтобы безопасно удалять
+        local enemy = enemies[i]
+        if enemy.active then
+            enemy.index = enemy.index + 1
+            if enemy.index > #enemy.path then
+                enemy.active = false
+                table.remove(enemies, i)  -- удаляем врага после достижения конца пути
+            end
+        end
+    end
+
 end
 
 
@@ -115,6 +151,14 @@ function love.draw()
         local point = bullet_path[bullet_index]
         love.graphics.draw(bullet, point[1], point[2])
     end
+
+
+    for _, enemy in ipairs(enemies) do
+        if enemy.active then
+            local point = enemy.path[enemy.index]
+            love.graphics.draw(enemy_img, point[1], point[2])
+        end
+    end
 end
 
 
@@ -132,6 +176,19 @@ function get_cords_for_bullet(x_s, y_s, x_e, y_e, quantity)
     for i=1, quantity do
         local x = ((quantity - i)*x_s +x_e * i)/quantity--x
         local y = ((quantity - i)*y_s +y_e * i)/quantity --y
+        table.insert(points_array, {x, y})
+    end
+    return points_array
+end
+
+
+function get_enemy_path(start_enemy_x_pos, start_enemy_y_pos, quantity)
+    local end_x = start_enemy_x_pos
+    local end_y = love.graphics.getHeight()  
+    points_array = {}
+    for i=1, quantity do
+        local x = ((quantity - i)*start_enemy_x_pos + end_x * i)/quantity
+        local y = ((quantity - i)*start_enemy_y_pos + end_y * i)/quantity
         table.insert(points_array, {x, y})
     end
     return points_array
