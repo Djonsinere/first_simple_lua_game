@@ -9,6 +9,9 @@ function love.load()
     abs_rotation = 0
     love.window.setMode(350,350,{resizable = true, minwidth = 350, minheight = 350})
     window_width, window_height = love.graphics.getDimensions()
+        -- Низ окна
+    ground_cx = window_width / 2
+    ground_cy = window_height / 1.2
 
     --spriteSheet = love.graphics.newImage("sprites/player/animation/canon_rotate_left-Sheet.png")
     --frameWidth, frameHeight = 128, 64
@@ -47,18 +50,35 @@ function love.update(dt)
         print("pressed [d]: ", abs_rotation)
     end
 
-    if love.keyboard.isDown("space") then
-        bullet_state = true
-        print("pressed [space]: ", abs_rotation)
-    end 
+    if love.keyboard.isDown("space") and not bullet_active then
+            bullet_active = true
+            bullet_index = 1
 
+            -- вычисляем траекторию в момент выстрела
+            local barrelLength = 150
+            local startX = ground_cx
+            local startY = ground_cy
+            local endX = startX + math.cos(abs_rotation - math.pi/2) * barrelLength
+            local endY = startY + math.sin(abs_rotation - math.pi/2) * barrelLength
+
+            bullet_path = get_cords_for_bullet(startX, startY, endX, endY, 10)
+        end 
+
+        if bullet_active then
+            bullet_index = bullet_index + 1
+            if bullet_index > #bullet_path then
+                bullet_active = false -- пуля достигла конца
+            end
+        end
 end
+
+
 
 
 function love.draw()
     -- Низ окна
-    local ground_cx = window_width / 2
-    local ground_cy = window_height / 1.2
+    --local ground_cx = window_width / 2
+    --local ground_cy = window_height / 1.2
 
     -- Рисуем ground (своим масштабом)
     love.graphics.draw(
@@ -80,14 +100,21 @@ function love.draw()
         player_img_W /2, player_img_H
     )
 
-    if bullet_state == true then
-         love.graphics.draw(
-            bullet,
-            50, 50
-            )
-         bullet_state = false
-    end
+     -- Линия прицела
+    local barrelLength = 150 -- длина линии
+    local startX = ground_cx
+    local startY = ground_cy
+    local endX = startX + math.cos(abs_rotation - math.pi/2) * barrelLength
+    local endY = startY + math.sin(abs_rotation - math.pi/2) * barrelLength
 
+    love.graphics.setColor(1, 1, 1) -- красная линия
+    love.graphics.setLineWidth(2)
+    love.graphics.line(startX, startY, endX, endY)
+
+    if bullet_active then
+        local point = bullet_path[bullet_index]
+        love.graphics.draw(bullet, point[1], point[2])
+    end
 end
 
 
@@ -99,3 +126,13 @@ function love.resize(w, h)
     scale_player = 1
 end
 
+
+function get_cords_for_bullet(x_s, y_s, x_e, y_e, quantity) 
+    points_array = {}
+    for i=1, quantity do
+        local x = ((quantity - i)*x_s +x_e * i)/quantity--x
+        local y = ((quantity - i)*y_s +y_e * i)/quantity --y
+        table.insert(points_array, {x, y})
+    end
+    return points_array
+end
