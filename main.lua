@@ -11,11 +11,11 @@ function love.load()
     enemy_img = love.graphics.newImage('sprites/enemy/enemy_32.png')
     enemy_img_W, enemy_img_H = enemy_img:getWidth(), enemy_img:getHeight()
     enemies = {}  -- массив всех врагов
-    max_enemies = 5  -- например, одновременно максимум 5 врагов
+    max_enemies = 5  
     spawn_timer = 0
-    spawn_interval = 2  -- каждые 2 секунды спавним врага
+    spawn_interval = 2  
 
-    love.window.setMode(350,350,{resizable = true, minwidth = 350, minheight = 350})
+    love.window.setMode(450,450,{resizable = true, minwidth = 350, minheight = 350})
     window_width, window_height = love.graphics.getDimensions()
         -- Низ окна
     ground_cx = window_width / 2
@@ -63,7 +63,7 @@ function love.update(dt)
             bullet_index = 1
 
             -- вычисляем траекторию в момент выстрела
-            local barrelLength = 300
+            local barrelLength = 500
             local startX = ground_cx
             local startY = ground_cy
             local endX = startX + math.cos(abs_rotation - math.pi/2) * barrelLength
@@ -95,7 +95,7 @@ function love.update(dt)
     end
     
     -- Обновляем всех врагов
-    for i = #enemies, 1, -1 do  -- идём с конца, чтобы безопасно удалять
+    for i = #enemies, 1, -1 do  
         local enemy = enemies[i]
         if enemy.active then
             enemy.index = enemy.index + 1
@@ -166,8 +166,8 @@ function love.resize(w, h)
     -- Масштаб земли, чтобы она вписывалась в окно
     scale_ground = math.min(w / ground:getWidth(), h / ground:getHeight())
 
-    -- Масштаб игрока — фиксированный (например, 1)
-    scale_player = 1
+    -- Масштаб игрока — фиксированный 
+    scale_player =  math.min(w / ground:getWidth(), h / ground:getHeight())
 end
 
 

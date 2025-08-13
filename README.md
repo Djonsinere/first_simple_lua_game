@@ -1,0 +1,1 @@
+usage: brew install love && cd ~/first_simple_lua_game && love .
