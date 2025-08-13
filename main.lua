@@ -81,6 +81,7 @@ function love.update(dt)
         print("pressed [space], bullet_index: ", bullet_index, "bullet_path: ", bullet_path )
 
 
+
     spawn_timer = spawn_timer + dt
     if spawn_timer >= spawn_interval and #enemies < max_enemies then
         spawn_timer = 0
@@ -94,6 +95,12 @@ function love.update(dt)
         print("enemy spawned at x:", start_x)
     end
     
+    --if bullet_point[1] == enemy_point[1] and bullet_point[2] == enemy_point[2] then
+    --    enemy.active = false
+    --    bullet_active = false
+    --    print("enemy destroyed")
+    --end
+
     -- Обновляем всех врагов
     for i = #enemies, 1, -1 do  
         local enemy = enemies[i]
@@ -148,15 +155,15 @@ function love.draw()
     love.graphics.line(startX, startY, endX, endY)
 
     if bullet_active then
-        local point = bullet_path[bullet_index]
-        love.graphics.draw(bullet, point[1], point[2])
+        local bullet_point = bullet_path[bullet_index]
+        love.graphics.draw(bullet, bullet_point[1], bullet_point[2])
     end
 
 
     for _, enemy in ipairs(enemies) do
         if enemy.active then
-            local point = enemy.path[enemy.index]
-            love.graphics.draw(enemy_img, point[1], point[2])
+            local enemy_point = enemy.path[enemy.index]
+            love.graphics.draw(enemy_img, enemy_point[1], enemy_point[2])
         end
     end
 end
